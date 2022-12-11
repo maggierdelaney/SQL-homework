@@ -1,4 +1,23 @@
 const inquirer = require('inquirer');
+const mysql = require('mysql2');
+
+const db = mysql.createConnection(
+    {
+      host: 'localhost',
+      user: 'root',
+      password: 'password',
+      database: 'hospital_db'
+    },
+    console.log(`Connected to the hospital_db database.`)
+  );
+
+db.connect(err => {
+    if(err) {
+        throw err
+    }
+    console.log('Mysql connected')
+})
+
 
 const mainMenu = () => {
     return inquirer.prompt([
@@ -35,15 +54,27 @@ const mainMenu = () => {
 };
 
 function viewDept() {
-    //all depts in table: names + ids
+    db.query('SELECT * FROM departments', function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        mainMenu();
+    })
 };
 
 function viewRole() {
-    //all roles in table: job title, role id, dept, salary
+    db.query('SELECT * FROM roles', function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        mainMenu();
+    })
 };
 
 function viewEmployee() {
-    //all employees in table: employee id, first name, last name, job title, dept, salary, manager
+    db.query('SELECT * FROM employees', function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        mainMenu();
+    })
 };
 
 const addDept = () => {
@@ -55,7 +86,12 @@ const addDept = () => {
         }
     ])
     .then(({ department }) => {
-        //department added to table//
+        db.query(`INSERT INTO departments (department) VALUES (?)`),
+        data.department,
+        function (err, results) {
+            if (err) throw err;
+            console.table(results);
+        }
         mainMenu();
     })
 };
@@ -64,7 +100,7 @@ const addRole = () => {
     return inquirer.prompt([
         {
             type: 'input',
-            name: 'role',
+            name: 'title',
             message: 'Please enter the role name:'
         },
         {
@@ -79,8 +115,13 @@ const addRole = () => {
             choices: ["Medicine", "Nursing", "Rehabilitation", "Adminstration"]
         }
     ])
-    .then(({ role, salary, department }) => {
-        //role added to table
+    .then(({ title, salary, department }) => {
+        db.query(`INSERT INTO roles (title, salary, department_id) VALUES (? ? ?)`),
+        data.title, data.salary, data.department_id,
+        function (err, results) {
+            if (err) throw err;
+            console.table(results);
+        }
         mainMenu();
     })
 };
@@ -107,35 +148,49 @@ const addEmployee = () => {
             type: 'list',
             name: 'manager',
             message: 'Who is the manager of the employee?',
-            choices: ["manager names"]
+            choices: ["Manager1", "Manager2", "Manager3", "Manager4"]
         }
     ])
     .then(({ first, last, role, manager }) => {
-        //employee added to table//
+        db.query(`INSERT INTO roles (first, last, role_id, manager_id) VALUES (? ? ? ?)`),
+        data.first, data.last, data.role_id, data.manager_id,
+        function (err, results) {
+            if (err) throw err;
+            console.table(results);
+        }
         mainMenu();
     })
 };
 
-const updateRole = () => {
-    return inquirer.prompt([
-        {
-            type: 'list',
-            name: 'update',
-            message: 'Please select the employee whose role you would like to update:',
-            choices: 'employee list'
-        },
-        {
-            type: 'list',
-            name: 'update',
-            message: 'Please select the desired role:',
-            choices: 'role list'
-        }
-    ])
-    .then((update) => {
-        if (update == true) {
-            addEmployee();
-            //or other function to 'replace' current info
-        };
-        mainMenu();
-    })
-};
+// const updateRole = () => {
+//     return inquirer.prompt([
+//         {
+//             type: 'list',
+//             name: 'update',
+//             message: 'Please select the employee whose role you would like to update:',
+//             choices: 'employee list'
+//         },
+//         {
+//             type: 'list',
+//             name: 'update',
+//             message: 'Please select the desired role:',
+//             choices: 'role list'
+//         }
+//     ])
+//     .then((update) => {
+//         if (update == true) {
+//             let newFirstName = 'Updated first name'
+//             let newLastName = 'Updated last name'
+//             let newRole = 'Updated role'
+//             let newManager = 'Updated manager'
+//             db.query(`UPDATE employees SET name = '${newFirstName}' WHERE id = ${req.params.id}`),
+//             data.first, data.last, data.role, data.manager,
+//             function (err, results) {
+//                 if (err) throw err;
+//                 console.table(results);
+//             }
+//             mainMenu();
+//     })
+// };
+
+mainMenu();
