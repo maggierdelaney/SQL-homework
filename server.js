@@ -3,16 +3,16 @@ const mysql = require('mysql2');
 
 const db = mysql.createConnection(
     {
-      host: 'localhost',
-      user: 'root',
-      password: 'password',
-      database: 'hospital_db'
+        host: 'localhost',
+        user: 'root',
+        password: 'password',
+        database: 'employee_db'
     },
     console.log(`Connected to the hospital_db database.`)
-  );
+);
 
 db.connect(err => {
-    if(err) {
+    if (err) {
         throw err
     }
     console.log('Mysql connected')
@@ -85,15 +85,15 @@ const addDept = () => {
             message: 'What is the name of the department?'
         }
     ])
-    .then(({ department }) => {
-        db.query(`INSERT INTO departments (department) VALUES (?)`),
-        data.department,
-        function (err, results) {
-            if (err) throw err;
-            console.table(results);
-        }
-        mainMenu();
-    })
+        .then(({ department }) => {
+            const sql = `INSERT INTO departments (department) VALUES (?)`;
+            const params = [department];
+            db.query(sql, params, (err, results) => {
+                if (err) throw err;
+                console.table(results);
+            });
+            mainMenu();
+        })
 };
 
 const addRole = () => {
@@ -116,12 +116,12 @@ const addRole = () => {
         }
     ])
     .then(({ title, salary, department }) => {
-        db.query(`INSERT INTO roles (title, salary, department_id) VALUES (? ? ?)`),
-        data.title, data.salary, data.department_id,
-        function (err, results) {
+        const sql = `INSERT INTO roles (title, salary, department) VALUES (? ? ?)`;
+        const params = [title, salary, department];
+        db.query(sql, params, (err, results) => {
             if (err) throw err;
             console.table(results);
-        }
+        });
         mainMenu();
     })
 };
@@ -152,45 +152,40 @@ const addEmployee = () => {
         }
     ])
     .then(({ first, last, role, manager }) => {
-        db.query(`INSERT INTO roles (first, last, role_id, manager_id) VALUES (? ? ? ?)`),
-        data.first, data.last, data.role_id, data.manager_id,
-        function (err, results) {
+        const sql = `INSERT INTO employees (first, last, role_id, manager_id) VALUES (? ? ? ?)`;
+        const params = [first, last, role, manager];
+        db.query(sql, params, (err, results) => {
             if (err) throw err;
             console.table(results);
-        }
+        });
         mainMenu();
     })
 };
 
-// const updateRole = () => {
-//     return inquirer.prompt([
-//         {
-//             type: 'list',
-//             name: 'update',
-//             message: 'Please select the employee whose role you would like to update:',
-//             choices: 'employee list'
-//         },
-//         {
-//             type: 'list',
-//             name: 'update',
-//             message: 'Please select the desired role:',
-//             choices: 'role list'
-//         }
-//     ])
-//     .then((update) => {
-//         if (update == true) {
-//             let newFirstName = 'Updated first name'
-//             let newLastName = 'Updated last name'
-//             let newRole = 'Updated role'
-//             let newManager = 'Updated manager'
-//             db.query(`UPDATE employees SET name = '${newFirstName}' WHERE id = ${req.params.id}`),
-//             data.first, data.last, data.role, data.manager,
-//             function (err, results) {
-//                 if (err) throw err;
-//                 console.table(results);
-//             }
-//             mainMenu();
-//     })
-// };
+const updateRole = () => {
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee',
+            message: 'Please select the employee you would like to update:',
+            choices: ['Jane Doe', 'John Dean', 'Joseph Dale', 'Jake Daniel']
+        },
+        {
+            type: 'list',
+            name: 'role',
+            message: 'Please select the desired role:',
+            choices: ['Medicine', 'Nursing', 'Rehabilitation', 'Administration']
+        }
+    ])
+        .then(({ employee, role }) => {
+            const sql = `UPDATE employees SET employee = ? WHERE role_id = ?`;
+            const params = [employee, role];
+            db.query(sql, params, (err, results) => {
+                if (err) throw err;
+                console.table(results);
+            });
+            mainMenu();
+        });
+};
 
 mainMenu();

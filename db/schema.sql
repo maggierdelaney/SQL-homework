@@ -1,11 +1,11 @@
-DROP DATABASE IF EXISTS hospital_db;
-CREATE DATABASE hospital_db;
+DROP DATABASE IF EXISTS employee_db;
+CREATE DATABASE employee_db;
 
-USE hospital_db;
+USE employee_db;
 
 CREATE TABLE departments (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  department VARCHAR(100) NOT NULL.
+  department VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE roles (
@@ -13,9 +13,9 @@ CREATE TABLE roles (
   title VARCHAR(100) NOT NULL,
   salary INT NOT NULL,
   department_id INT,
-  FOREIGN KEY(department_id),
-  REFERENCES departments(id),
-  ON DELETE SET NULL,
+  FOREIGN KEY(department_id)
+  REFERENCES departments(id)
+  ON DELETE SET NULL
 );
 
 CREATE TABLE employees (
@@ -24,8 +24,8 @@ CREATE TABLE employees (
   last_name VARCHAR(100) NOT NULL,
   role_id INT,
   manager_id INT,
-  FOREIGN KEY(role_id),
-  REFERENCES roles(id),
+  FOREIGN KEY(role_id)
+  REFERENCES roles(id)
   ON DELETE SET NULL,
   FOREIGN KEY (manager_id)
   REFERENCES employees(id)
