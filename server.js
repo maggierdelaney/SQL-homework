@@ -8,7 +8,7 @@ const db = mysql.createConnection(
         password: 'password',
         database: 'employee_db'
     },
-    console.log(`Connected to the hospital_db database.`)
+    console.log(`Connected to the employee_db database.`)
 );
 
 db.connect(err => {
@@ -97,32 +97,46 @@ const addDept = () => {
 };
 
 const addRole = () => {
-    return inquirer.prompt([
-        {
-            type: 'input',
-            name: 'title',
-            message: 'Please enter the role name:'
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'Please enter the role salary:'
-        },
-        {
-            type: 'list',
-            name: 'department',
-            message: 'Please select the department the role belongs to:',
-            choices: ["Medicine", "Nursing", "Rehabilitation", "Adminstration"]
-        }
-    ])
-    .then(({ title, salary, department }) => {
-        const sql = `INSERT INTO roles (title, salary, department) VALUES (? ? ?)`;
-        const params = [title, salary, department];
-        db.query(sql, params, (err, results) => {
-            if (err) throw err;
-            console.table(results);
-        });
-        mainMenu();
+    //promise goes with the .then
+    //rows reference the rows of the table (comes in an array)
+    //we set departments equal to that array of rows
+    //.map then takes the array and iterates over it to make it work with the prompt function (separates out the components)
+    db.promise().query('SELECT * FROM departments').then(([rows]) => {
+          let departments = rows;
+          const departmentOptions = departments.map(({id, department}) => ({
+            name: department,
+            value: id,
+          }))
+          inquirer.prompt([
+            {
+                type: 'input',
+                name: 'title',
+                message: 'Please enter the role name:'
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'Please enter the role salary:'
+            },
+            {
+                type: 'list',
+                name: 'department',
+                message: 'Please select the department the role belongs to:',
+                choices: departmentOptions
+            }
+        ])
+        .then(({ title, salary, department }) => {
+            const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+            const params = [title, salary, department];
+            db.query(sql, params, (err, results) => {
+                if (err) throw err;
+                console.table(results);
+            });
+            mainMenu();
+        })
+    })
+    .catch(error => {
+        console.log(error)
     })
 };
 
