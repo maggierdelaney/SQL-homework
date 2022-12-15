@@ -191,9 +191,7 @@ const addEmployee = () => {
 
 const updateRole = () => {
     db.promise().query('SELECT title AS name, id AS value FROM roles').then(([rows]) => {
-        console.log(rows);
         db.promise().query('SELECT concat(first_name, " ", last_name) AS name, id AS value FROM employees').then(([employeeRoles]) => {
-            console.log(employeeRoles);
             inquirer.prompt([
                 {
                     type: 'list',
